@@ -1,3 +1,3 @@
 # ADS
 
-Comparing Different Hashing Techniques
+Comparing Different Open Addressing Hashing Techniques
