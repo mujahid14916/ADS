@@ -1,5 +1,6 @@
 import random
 from time import time
+from sys import getsizeof
 
 
 # random.seed(50)
@@ -179,19 +180,19 @@ def rehash_search(table, element):
 
 
 def cuckoo_insert(table, data):
-    m = 2*len(table)
+    size = 2*len(table)
     while True:
-        m = 2*m
+        size = 2 * size
         # TODO: Actual Collisions
         collisions = []
         insert_failed = False
         hashed = {}
-        next_prime = next(get_prime(m))
+        next_prime = next(get_prime(size))
         for val in data:
-            hashed[val] = [val % m, (val*next_prime) % m]
+            hashed[val] = [val % size, (val*next_prime) % size]
 
-        table1 = [None] * m
-        table2 = [None] * m
+        table1 = [None] * size
+        table2 = [None] * size
 
         for val in data:
             element_to_insert = val
@@ -211,7 +212,7 @@ def cuckoo_insert(table, data):
                     else:
                         count += 1
                         element_to_insert, table2[second] = table2[second], element_to_insert
-                if count > m:
+                if count > 2*size:
                     insert_failed = True
                     break
             if insert_failed:
@@ -222,28 +223,49 @@ def cuckoo_insert(table, data):
     return [table1, table2], collisions, 0
 
 
-def cuckoo_search(table, val):
+def cuckoo_search(table, element):
     comps = 0
     table_size = len(table[0])
-    h1 = val % table_size
+    h1 = element % table_size
     comps += 1
-    if table[0][h1] == val:
+    if table[0][h1] == element:
         return comps, h1, 'F'
-    h2 = (val*get_prime(table_size)) % table_size
+    h2 = (element * get_prime(table_size)) % table_size
     comps += 1
-    if table[1][h2] == val:
+    if table[1][h2] == element:
         return comps, h2, 'F'
     return comps, -1, 'NF'
 
 
+def get_size(table):
+    b = getsizeof(table)
+    if isinstance(table[0], list):
+        for i in table:
+            b += getsizeof(i)
+
+    if b < 1024:
+        return '{:0.2f}'.format(b) + ' B'
+
+    kb = b/1024
+    if kb < 1024:
+        return '{:0.2f}'.format(kb) + ' KB'
+
+    mb = kb/1024
+    if mb < 1024:
+        return '{:0.2f}'.format(mb) + ' MB'
+
+    gb = mb/1024
+    return '{:0.2f}'.format(gb) + ' GB'
+
+
 def main():
-    hash_methods = {
-        'Linear': linear_insert,
-        'Quadratic': quadratic_insert,
-        'Double Hash': d_hash_insert,
-        'Rehash': rehash_insert,
-        'Cuckoo': cuckoo_insert,
-    }
+    hash_methods = [
+        ('Linear', linear_insert, linear_search),
+        ('Quadratic', quadratic_insert, quadratic_search),
+        ('Double Hash', d_hash_insert, d_hash_search),
+        ('Rehash', rehash_insert, rehash_search),
+        ('Cuckoo', cuckoo_insert, cuckoo_search),
+    ]
 
     for _ in range(91):
         print('-', end='')
@@ -252,29 +274,46 @@ def main():
     print('B: Total Collisions')
     print('C: Total Insert Failed')
     print('D: Total Time Taken')
-    print("{:13s}{:30s}{:7s}{:15s}".format('{:>10s}'.format("A"),
-                                           '{:>27s}'.format("B"),
-                                           '{:>5s}'.format("C"),
-                                           '{:>12s}'.format("D")))
+    print('E: Search Comparisons')
+    print('F: Search Result -> F = Found, NF = Not Found')
+    print('H: Table Size in Memory')
+    for _ in range(91):
+        print('-', end='')
+    print()
+
+    print("{:13s}{:30s}{:7s}{:15s}{:10s}{:5s}{:10s}"
+          .format('{:>10s}'.format("A"),
+                  '{:>27s}'.format("B"),
+                  '{:>5s}'.format("C"),
+                  '{:>12s}'.format("D"),
+                  '{:>7s}'.format("E"),
+                  '{:>3s}'.format("F"),
+                  '{:>10s}'.format("H"),
+                  ))
     for _ in range(91):
         print('-', end='')
     print()
     for k in get_prime(10, 5, 20, True):
         data = random.sample(set(range(k * 5)), k)
-        for p, (name, method) in enumerate(hash_methods.items()):
+        element_to_search = data[k-1]
+        for p, (name, insert_method, search_method) in enumerate(hash_methods):
             table = [None] * k
             start = time()
-            table, collision, insert_fail = method(table, data)
-            t = time() - start
+            table, collision, insert_fail = insert_method(table, data)
+            time_taken = time() - start
+            comps, index, result = search_method(table, element_to_search)
             if p != 0:
                 size = ''
             else:
                 size = k
-            print("{:13s}{:30s}{:7s}{:15s}"
+            print("{:13s}{:30s}{:7s}{:15s}{:10s}{:5s}{:10s}"
                   .format('{:>10s}'.format(str(size)),
                           '{:12s}'.format(name) + '{:>15s}'.format(str(sum(collision))),
                           '{:>5s}'.format(str(insert_fail)),
-                          '{:>12s}'.format('{:0.4f}'.format(t) + ' s'))
+                          '{:>12s}'.format('{:0.4f}'.format(time_taken) + ' s'),
+                          '{:>7s}'.format(str(comps)),
+                          '{:>3s}'.format(result),
+                          '{:>10s}'.format(get_size(table)))
                   )
         for _ in range(91):
             print('-', end='')
