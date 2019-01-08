@@ -262,9 +262,10 @@ def get_time_taken(time_taken_in_sec):
 
 def get_table_size(table):
     b = getsizeof(table)
+    b += sum(getsizeof(i) for i in table)
     if isinstance(table[0], list):
-        for i in table:
-            b += getsizeof(i)
+        for tab in table:
+            b += sum(getsizeof(i) for i in tab)
 
     if b < 1024:
         return '{:0.2f} B'.format(b)
