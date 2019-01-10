@@ -51,6 +51,7 @@ def display_result(text):
 def simulate_thread():
     global collisions, sim_btn, collisions_cum_sum, table_size, hash_methods
     disable_buttons()
+    # collisions = []
     collisions_cum_sum = []
     data = random.sample(set(range(table_size * 5)), table_size)
     element_to_search = data[table_size - 1]
@@ -76,8 +77,10 @@ def simulate_thread():
         start = time()
         table, collision, insert_fail = insert_method(table, data)
         time_taken = time() - start
+        # collisions.append(collision)
         collisions_cum_sum.append(np.cumsum(collision, dtype=np.uint32))
         comps, index, r = search_method(table, element_to_search)
+        r = 'Found' if r == 'F' else 'Not Found'
 
         message += "{:12s}{:17s}{:15s}{:10s}{:15s}{:15s}{:14s}{:8s}"\
             .format(name,
