@@ -29,7 +29,7 @@ def plot_graph():
     global plt_btn, collisions, collisions_cum_sum
     if len(collisions_cum_sum):
         disable_buttons()
-        fig = plt.figure('Random Graph')
+        fig = plt.figure('Hashing Collisions Graph')
         fig.canvas.mpl_connect('close_event', plot_close)
         x_labels = len(collisions_cum_sum[0])
         plt.title('Hashing Collisions Comparisons with Table Size: {}'.format(x_labels))
@@ -37,7 +37,7 @@ def plot_graph():
         plt.ylabel('Total Collisions')
         for i, c in enumerate(collisions_cum_sum):
             plt.plot(list(range(1, x_labels+1)), c, label=hash_methods[i][0])
-        plt.legend(loc=1)
+        plt.legend(loc=0)
         plt.show()
 
 
