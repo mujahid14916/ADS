@@ -114,7 +114,7 @@ def simulate():
 def fill_with_prime():
     global prime
     try:
-        start = int(prime.get()) + 1
+        start = int(prime.get())
         prime.set(next(get_prime(start)))
     except ValueError as e:
         prime.set(2)

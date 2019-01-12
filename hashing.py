@@ -27,6 +27,8 @@ def get_prime(start, count=1, step=1, multiplier=False):
     """
     i = 0
     number = start
+    if is_prime(number):
+        number += step
     while count > i:
         while True:
             if number < 2:
@@ -241,7 +243,7 @@ def cuckoo_search(table, element):
     comps += 1
     if table[0][h1] == element:
         return comps, h1, 'F'
-    h2 = (element * get_prime(table_size)) % table_size
+    h2 = (element * next(get_prime(table_size))) % table_size
     comps += 1
     if table[1][h2] == element:
         return comps, h2, 'F'
